@@ -1,2 +1,14 @@
-package org.czaplinski.bookshop.order.domain;public enum OrderStatus {
+package org.czaplinski.bookshop.order.domain;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+public enum OrderStatus {
+    NEW, CONFIRMED, IN_DELIVERY, CANCELED, RETURNED;
+
+    public static Optional<OrderStatus> parseString(String value) {
+        return Arrays.stream(values()).filter(it -> StringUtils.equalsAnyIgnoreCase(it.name(), value)).findFirst();
+    }
 }
