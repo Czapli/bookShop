@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,12 +36,25 @@ public class Book {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
     @JsonIgnoreProperties("books")
-    private Set<Author> authors;
+    private Set<Author> authors= new HashSet<>();
 
     public Book(String title, Integer year, BigDecimal price) {
         this.title = title;
         this.year = year;
         this.price = price;
+    }
+    public void addAuthor(Author author){
+        authors.add(author);
+        author.getBooks().add(this);
+    }
+    public void removeAuthor(Author author){
+        Book self = this;
+        authors.remove(author);
+        author.getBooks().remove(self);
+    }
+    public void removeAuthors(){
+        Book self = this;
+        authors.forEach(author -> author.getBooks().remove(self));
     }
 }
 

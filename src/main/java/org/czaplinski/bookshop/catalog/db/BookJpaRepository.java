@@ -27,4 +27,5 @@ public interface BookJpaRepository extends JpaRepository<Book, Long> {
                     " OR LOWER(a.lastName) LIKE LOWER(CONCAT('%', :name, '%')))"
     )
     List<Book> findByTitleAndAuthors(@Param("title") String title, @Param("name") String name);
+
 }
