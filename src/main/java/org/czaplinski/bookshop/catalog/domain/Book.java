@@ -3,7 +3,11 @@ package org.czaplinski.bookshop.catalog.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.czaplinski.bookshop.jpa.BaseEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -11,19 +15,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
 @Setter
+@Entity
 @ToString(exclude = "authors")
 @RequiredArgsConstructor
-@Entity
 @EntityListeners(AuditingEntityListener.class)
-public class Book {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class Book extends BaseEntity {
+
     private String title;
     private Integer year;
     private BigDecimal price;
@@ -33,28 +34,29 @@ public class Book {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany( cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable
     @JsonIgnoreProperties("books")
-    private Set<Author> authors= new HashSet<>();
+    private Set<Author> authors = new HashSet<>();
 
     public Book(String title, Integer year, BigDecimal price) {
         this.title = title;
         this.year = year;
         this.price = price;
     }
-    public void addAuthor(Author author){
+
+    public void addAuthor(Author author) {
         authors.add(author);
         author.getBooks().add(this);
     }
-    public void removeAuthor(Author author){
-        Book self = this;
+
+    public void removeAuthor(Author author) {
         authors.remove(author);
-        author.getBooks().remove(self);
+        author.getBooks().remove(this);
     }
-    public void removeAuthors(){
-        Book self = this;
-        authors.forEach(author -> author.getBooks().remove(self));
+
+    public void removeAuthors() {
+        authors.forEach(author -> author.getBooks().remove(this));
     }
 }
 

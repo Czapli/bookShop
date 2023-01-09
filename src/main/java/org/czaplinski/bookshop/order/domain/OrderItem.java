@@ -1,23 +1,20 @@
 package org.czaplinski.bookshop.order.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.czaplinski.bookshop.jpa.BaseEntity;
 
-@Data
+@Getter
+@Setter
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor
-public class OrderItem {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class OrderItem extends BaseEntity {
+
     private Long bookId;
     private int quantity;
 
-    public OrderItem(Long bookId, int quantity) {
-        this.bookId = bookId;
-        this.quantity = quantity;
-    }
 }

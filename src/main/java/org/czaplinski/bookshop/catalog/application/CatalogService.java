@@ -9,6 +9,7 @@ import org.czaplinski.bookshop.catalog.domain.Book;
 import org.czaplinski.bookshop.uploads.application.ports.UploadUseCase;
 import org.czaplinski.bookshop.uploads.domain.Upload;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +43,7 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public List<Book> findAll() {
-        return bookRepository.findAll();
+        return bookRepository.findAllEager();
     }
 
     @Override
@@ -52,6 +53,7 @@ class CatalogService implements CatalogUseCase {
     }
 
     @Override
+    @Transactional
     public Book addBook(CreateBookCommand command) {
         Book book = toBook(command);
         return bookRepository.save(book);

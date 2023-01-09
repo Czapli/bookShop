@@ -8,6 +8,7 @@ import org.czaplinski.bookshop.order.db.OrderJpaRepository;
 import org.czaplinski.bookshop.order.domain.Order;
 import org.czaplinski.bookshop.order.domain.OrderItem;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class QueryOrderService implements QueryOrderUseCase {
     private final BookJpaRepository catalogRepository;
 
     @Override
+    @Transactional
     public List<RichOrder> findAll() {
         return repository.findAll().stream()
                 .map(this::toRichOrder)
@@ -48,8 +50,9 @@ public class QueryOrderService implements QueryOrderUseCase {
                     Book book = catalogRepository
                             .findById(item.getBookId())
                             .orElseThrow(() ->
-                                    new IllegalStateException("Unable to find book with ID: "+ item.getBookId()));
-                return new RichOrderItem(book, item.getQuantity());})
+                                    new IllegalStateException("Unable to find book with ID: " + item.getBookId()));
+                    return new RichOrderItem(book, item.getQuantity());
+                })
                 .collect(Collectors.toList());
     }
 

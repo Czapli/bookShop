@@ -1,19 +1,16 @@
 package org.czaplinski.bookshop.order.domain;
 
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import lombok.*;
+import org.czaplinski.bookshop.jpa.BaseEntity;
 
-@Data
+@Getter
+@Setter
+@Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Recipient {
-    @Id@GeneratedValue
-    private Long id;
+public class Recipient extends BaseEntity {
     private String name;
     private String phone;
     private String street;
@@ -21,7 +18,4 @@ public class Recipient {
     private String zipCode;
     private String email;
 
-    public Recipient(String name, String phone, String street, String city, String zipCode, String email) {
-
-    }
 }
