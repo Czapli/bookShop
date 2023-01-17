@@ -15,7 +15,7 @@ public interface BookJpaRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByTitleStartingWithIgnoreCase(String title);
 
-    @Query("SELECT b FROM Book b JOIN FETCH b.authors")
+    @Query("SELECT DISTINCT b FROM Book b JOIN FETCH b.authors")
     List<Book> findAllEager();
 
     @Query(

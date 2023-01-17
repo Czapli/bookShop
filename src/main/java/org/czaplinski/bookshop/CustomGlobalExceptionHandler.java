@@ -17,27 +17,35 @@ import java.util.stream.Collectors;
 public class CustomGlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handlerException(MethodArgumentNotValidException e) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        body.put("timestamp", new Date());
-        body.put("status", status.value());
-
-        List<String> errors = e
+        ResponseEntity<Object> errors = handleError(HttpStatus.BAD_REQUEST, e
                 .getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(x -> x.getField() + " - " + x.getDefaultMessage())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        return errors;
+    }
+
+    private static ResponseEntity<Object> handleError(HttpStatus status, List<String> errors) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", new Date());
+        body.put("status", status.value());
+
         body.put("errors", errors);
         return new ResponseEntity<>(body, status);
     }
+
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> IOExceptionHandler(IOException e){
+    public ResponseEntity<Object> iOExceptionHandler(IOException e){
         Map<String, Object> body = new LinkedHashMap<>();
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         body.put("timestamp", new Date());
         body.put("status", status.value());
         body.put("errors", e.getMessage());
         return new ResponseEntity<>(body, status);
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handler(IllegalArgumentException e){
+        return handleError(HttpStatus.BAD_REQUEST, List.of(e.getMessage()));
     }
 }

@@ -3,7 +3,6 @@ package org.czaplinski.bookshop.catalog.application.port;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import org.czaplinski.bookshop.catalog.domain.Author;
 import org.czaplinski.bookshop.catalog.domain.Book;
 
 import java.math.BigDecimal;
