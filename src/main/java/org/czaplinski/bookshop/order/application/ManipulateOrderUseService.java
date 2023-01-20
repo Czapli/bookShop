@@ -5,9 +5,11 @@ import org.czaplinski.bookshop.catalog.db.BookJpaRepository;
 import org.czaplinski.bookshop.catalog.domain.Book;
 import org.czaplinski.bookshop.order.application.port.ManipulateOrderUseCase;
 import org.czaplinski.bookshop.order.db.OrderJpaRepository;
+import org.czaplinski.bookshop.order.db.RecipientJpaRepository;
 import org.czaplinski.bookshop.order.domain.Order;
 import org.czaplinski.bookshop.order.domain.OrderItem;
 import org.czaplinski.bookshop.order.domain.OrderStatus;
+import org.czaplinski.bookshop.order.domain.Recipient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +21,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ManipulateOrderUseService implements ManipulateOrderUseCase {
     private final OrderJpaRepository repository;
-    private final BookJpaRepository bookJpaRepository;
+    private final BookJpaRepository bookRepository;
+    private final RecipientJpaRepository recipientRepository;
 
     @Override
     public PlaceOrderResponse placeOrder(PlaceOrderCommand command) {
@@ -30,12 +33,18 @@ public class ManipulateOrderUseService implements ManipulateOrderUseCase {
                 .collect(Collectors.toSet());
         Order order = Order
                 .builder()
-                .recipient(command.getRecipient())
+                .recipient(getOrCreateRecipient(command.getRecipient()))
                 .items(items)
                 .build();
         Order save = repository.save(order);
-        bookJpaRepository.saveAll(updateBooks(items));
+        bookRepository.saveAll(updateBooks(items));
         return PlaceOrderResponse.success(save.getId());
+    }
+
+    private Recipient getOrCreateRecipient(Recipient recipient) {
+        return recipientRepository
+                .findByEmailIgnoreCase(recipient.getEmail())
+                .orElse(recipient);
     }
 
     private Set<Book> updateBooks(Set<OrderItem> items) {
@@ -48,7 +57,7 @@ public class ManipulateOrderUseService implements ManipulateOrderUseCase {
     }
 
     private OrderItem toOrderItem(OrderItemCommand orderItemCommand) {
-        Book book = bookJpaRepository.getReferenceById(orderItemCommand.getBookId());
+        Book book = bookRepository.getReferenceById(orderItemCommand.getBookId());
         int quantity = orderItemCommand.getQuantity();
         if (book.getAvailable() >= quantity) {
             return new OrderItem(book, orderItemCommand.getQuantity());
