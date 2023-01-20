@@ -1,9 +1,6 @@
 package org.czaplinski.bookshop.order.application.port;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import lombok.*;
 import org.czaplinski.bookshop.commons.Either;
 import org.czaplinski.bookshop.order.domain.OrderItem;
 import org.czaplinski.bookshop.order.domain.OrderStatus;
@@ -23,8 +20,15 @@ public interface ManipulateOrderUseCase {
     @AllArgsConstructor
     class PlaceOrderCommand {
         @Singular
-        List<OrderItem> items;
+        List<OrderItemCommand> items;
         Recipient recipient;
+    }
+
+    @Data
+    @Value
+    class OrderItemCommand {
+        Long bookId;
+        int quantity;
     }
 
     @Value

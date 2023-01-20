@@ -60,8 +60,8 @@ class CatalogService implements CatalogUseCase {
     }
 
     private Book toBook(CreateBookCommand command) {
-        Book book = new Book(command.getTitle(), command.getYear(), command.getPrice());
-        Set<Author> authors = fetchAuthorByIds(command.getAuthors());
+        Book book = new Book(command.title(), command.year(), command.price(), command.available());
+        Set<Author> authors = fetchAuthorByIds(command.authors());
         updateBook(book, authors);
         return book;
     }
@@ -83,27 +83,27 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public UpdateBookResponse updateBook(UpdateBookCommand command) {
-        return bookRepository.findById(command.getId())
+        return bookRepository.findById(command.id())
                 .map(book -> {
                     Book updatedBook = updateFields(command, book);
                     bookRepository.save(updatedBook);
                     return UpdateBookResponse.SUCCESS;
                 })
-                .orElseGet(() -> new UpdateBookResponse(false, Arrays.asList("Book not found with ID: " + command.getId())));
+                .orElseGet(() -> new UpdateBookResponse(false, Arrays.asList("Book not found with ID: " + command.id())));
     }
 
     private Book updateFields(UpdateBookCommand command, Book book) {
-        if (command.getTitle() != null) {
-            book.setTitle(command.getTitle());
+        if (command.title() != null) {
+            book.setTitle(command.title());
         }
-        if (command.getAuthors() != null && !command.getAuthors().isEmpty()) {
-            updateBook(book, fetchAuthorByIds(command.getAuthors()));
+        if (command.authors() != null && !command.authors().isEmpty()) {
+            updateBook(book, fetchAuthorByIds(command.authors()));
         }
-        if (command.getYear() != null) {
-            book.setYear(command.getYear());
+        if (command.year() != null) {
+            book.setYear(command.year());
         }
-        if (command.getPrice() != null) {
-            book.setPrice(command.getPrice());
+        if (command.price() != null) {
+            book.setPrice(command.price());
         }
         return book;
     }
@@ -116,13 +116,13 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public void updateBookCover(UpdateBookCoverCommand command) {
-        int length = command.getFile().length;
-        bookRepository.findById(command.getId())
+        int length = command.file().length;
+        bookRepository.findById(command.id())
                 .ifPresent(book -> {
                     Upload saveUpload = upload.save(new SaveUploadCommand(
-                            command.getFileName(),
-                            command.getFile(),
-                            command.getContentType()));
+                            command.fileName(),
+                            command.file(),
+                            command.contentType()));
                     book.setCoverId(saveUpload.getId());
                     bookRepository.save(book);
                 });

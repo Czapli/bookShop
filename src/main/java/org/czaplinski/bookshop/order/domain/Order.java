@@ -8,7 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,7 +25,7 @@ public class Order extends BaseEntity {
     private OrderStatus orderStatus = OrderStatus.NEW;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
-    private List<OrderItem> items;
+    private Set<OrderItem> items;
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Recipient recipient;
     @CreatedDate

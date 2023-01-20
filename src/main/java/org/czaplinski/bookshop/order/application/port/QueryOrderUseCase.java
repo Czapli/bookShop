@@ -3,6 +3,7 @@ package org.czaplinski.bookshop.order.application.port;
 import lombok.Value;
 import org.czaplinski.bookshop.catalog.domain.Book;
 import org.czaplinski.bookshop.order.domain.Order;
+import org.czaplinski.bookshop.order.domain.OrderItem;
 import org.czaplinski.bookshop.order.domain.OrderStatus;
 import org.czaplinski.bookshop.order.domain.Recipient;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface QueryOrderUseCase {
     List<RichOrder> findAll();
@@ -22,7 +24,7 @@ public interface QueryOrderUseCase {
     class RichOrder{
         Long id;
         OrderStatus status;
-        List<RichOrderItem> items;
+        Set<OrderItem> items;
         Recipient recipient;
         LocalDateTime createAt;
 
@@ -31,10 +33,5 @@ public interface QueryOrderUseCase {
                     .map(item ->
                             item.getBook().getPrice().multiply(new BigDecimal(item.getQuantity()))).reduce(BigDecimal.ZERO,BigDecimal::add);
         }
-    }
-    @Value
-    class RichOrderItem{
-        Book book;
-        int quantity;
     }
 }

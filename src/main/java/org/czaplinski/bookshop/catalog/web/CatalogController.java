@@ -1,10 +1,7 @@
 package org.czaplinski.bookshop.catalog.web;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.czaplinski.bookshop.CreatedURI;
@@ -12,7 +9,6 @@ import org.czaplinski.bookshop.catalog.application.port.CatalogUseCase;
 import org.czaplinski.bookshop.catalog.application.port.CatalogUseCase.CreateBookCommand;
 import org.czaplinski.bookshop.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import org.czaplinski.bookshop.catalog.application.port.CatalogUseCase.UpdateBookResponse;
-import org.czaplinski.bookshop.catalog.domain.Author;
 import org.czaplinski.bookshop.catalog.domain.Book;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -73,8 +69,8 @@ public class CatalogController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateBook(@PathVariable Long id, @RequestBody RestBookCommand command) {
         UpdateBookResponse response = catalog.updateBook(command.toUpdateCommand(id));
-        if (!response.isSuccess()) {
-            String message = String.join("' ", response.getErrors());
+        if (!response.success()) {
+            String message = String.join("' ", response.errors());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
         }
     }
@@ -111,12 +107,14 @@ public class CatalogController {
         private Set<Long> authors;
         @NotNull(message = "Pleas provide title")
         private Integer year;
+        @PositiveOrZero
+        private Long available;
         @NotNull(message = "Pleas provide price")
         @DecimalMin(value = "0.00", message = "Price must be grater by zero")
         private BigDecimal price;
 
         CreateBookCommand toCreateBookCommand() {
-            return new CreateBookCommand(title, authors, year, price);
+            return new CreateBookCommand(title, authors, year, price, available);
         }
 
         UpdateBookCommand toUpdateCommand(Long id) {

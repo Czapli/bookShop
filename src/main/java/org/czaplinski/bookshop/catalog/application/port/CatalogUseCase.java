@@ -21,6 +21,7 @@ public interface CatalogUseCase {
     List<Book> findAll();
 
     Optional<Book> findById(Long id);
+
     List<Book> findByTitleAndAuthor(String title, String Author);
 
     Book addBook(CreateBookCommand command);
@@ -33,38 +34,21 @@ public interface CatalogUseCase {
 
     void removeBookCover(Long id);
 
-    @Value
-    class UpdateBookCoverCommand {
-        Long id;
-        byte[] file;
-        String contentType;
-        String fileName;
-    }
-
-    @Value
-    class CreateBookCommand {
-        String title;
-        Set<Long> authors;
-        Integer year;
-        BigDecimal price;
+    record UpdateBookCoverCommand(Long id, byte[] file, String contentType, String fileName) {
     }
 
 
-    @Value
+        record CreateBookCommand(String title, Set<Long> authors, Integer year, BigDecimal price, Long available) {
+    }
+
+
     @Builder
-    @AllArgsConstructor
-    class UpdateBookCommand {
-        Long id;
-        String title;
-        Set<Long> authors;
-        Integer year;
-        BigDecimal price;
+
+    record UpdateBookCommand(Long id, String title, Set<Long> authors, Integer year, BigDecimal price) {
     }
 
-    @Value
-    class UpdateBookResponse {
+
+    record UpdateBookResponse(boolean success, List<String> errors) {
         public static UpdateBookResponse SUCCESS = new UpdateBookResponse(true, Collections.emptyList());
-        boolean success;
-        List<String> errors;
     }
 }

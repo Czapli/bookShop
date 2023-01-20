@@ -2,11 +2,9 @@ package org.czaplinski.bookshop.order.application;
 
 import lombok.AllArgsConstructor;
 import org.czaplinski.bookshop.catalog.db.BookJpaRepository;
-import org.czaplinski.bookshop.catalog.domain.Book;
 import org.czaplinski.bookshop.order.application.port.QueryOrderUseCase;
 import org.czaplinski.bookshop.order.db.OrderJpaRepository;
 import org.czaplinski.bookshop.order.domain.Order;
-import org.czaplinski.bookshop.order.domain.OrderItem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,26 +32,12 @@ public class QueryOrderService implements QueryOrderUseCase {
     }
 
     private RichOrder toRichOrder(Order order) {
-        List<RichOrderItem> richItems = toRichItems(order.getItems());
         return new RichOrder(
                 order.getId(),
                 order.getOrderStatus(),
-                richItems,
+                order.getItems(),
                 order.getRecipient(),
                 order.getCreatedAt()
         );
     }
-
-    private List<RichOrderItem> toRichItems(List<OrderItem> items) {
-        return items.stream()
-                .map(item -> {
-                    Book book = catalogRepository
-                            .findById(item.getBookId())
-                            .orElseThrow(() ->
-                                    new IllegalStateException("Unable to find book with ID: " + item.getBookId()));
-                    return new RichOrderItem(book, item.getQuantity());
-                })
-                .collect(Collectors.toList());
-    }
-
 }

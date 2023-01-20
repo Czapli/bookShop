@@ -1,26 +1,59 @@
 package org.czaplinski.bookshop.order.application;
 
 import lombok.AllArgsConstructor;
+import org.czaplinski.bookshop.catalog.db.BookJpaRepository;
+import org.czaplinski.bookshop.catalog.domain.Book;
 import org.czaplinski.bookshop.order.application.port.ManipulateOrderUseCase;
 import org.czaplinski.bookshop.order.db.OrderJpaRepository;
 import org.czaplinski.bookshop.order.domain.Order;
+import org.czaplinski.bookshop.order.domain.OrderItem;
 import org.czaplinski.bookshop.order.domain.OrderStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class ManipulateOrderUseService implements ManipulateOrderUseCase {
     private final OrderJpaRepository repository;
+    private final BookJpaRepository bookJpaRepository;
 
     @Override
     public PlaceOrderResponse placeOrder(PlaceOrderCommand command) {
+        Set<OrderItem> items = command
+                .getItems()
+                .stream()
+                .map(this::toOrderItem)
+                .collect(Collectors.toSet());
         Order order = Order
                 .builder()
                 .recipient(command.getRecipient())
-                .items(command.getItems())
+                .items(items)
                 .build();
         Order save = repository.save(order);
+        bookJpaRepository.saveAll(updateBooks(items));
         return PlaceOrderResponse.success(save.getId());
+    }
+
+    private Set<Book> updateBooks(Set<OrderItem> items) {
+        return items.stream()
+                .map(item -> {
+                    Book book = item.getBook();
+                    book.setAvailable(book.getAvailable() - item.getQuantity());
+                    return book;
+                }).collect(Collectors.toSet());
+    }
+
+    private OrderItem toOrderItem(OrderItemCommand orderItemCommand) {
+        Book book = bookJpaRepository.getReferenceById(orderItemCommand.getBookId());
+        int quantity = orderItemCommand.getQuantity();
+        if (book.getAvailable() >= quantity) {
+            return new OrderItem(book, orderItemCommand.getQuantity());
+        }
+        throw new IllegalArgumentException("Too many copies of book " + book.getId() + " requested " + quantity + " of " + book.getAvailable() + " available");
     }
 
     @Override
