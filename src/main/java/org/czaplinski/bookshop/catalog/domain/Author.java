@@ -24,8 +24,7 @@ public class Author extends BaseEntity {
     @Id
     @GeneratedValue
     private Long id;
-    private String firstName;
-    private String lastName;
+    private String name;
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST},
             mappedBy = "authors")
     @JsonIgnoreProperties("authors")
@@ -33,9 +32,8 @@ public class Author extends BaseEntity {
     @CreatedDate
     private LocalDateTime createAt;
 
-    public Author(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Author(String name) {
+        this.name = name;
     }
 
     public void addBook(Book book) {
@@ -46,8 +44,5 @@ public class Author extends BaseEntity {
     public void removeBook(Book book) {
         books.remove(book);
         book.getAuthors().remove(this);
-    }
-
-    public void removeAuthors() {
     }
 }

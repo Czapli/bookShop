@@ -3,7 +3,7 @@ package org.czaplinski.bookshop.order.domain;
 import lombok.Value;
 
 @Value
-public class UpdateStatusResult {
+public class  UpdateStatusResult {
     OrderStatus status;
     boolean revoke;
 

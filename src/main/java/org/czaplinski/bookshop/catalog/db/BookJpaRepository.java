@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookJpaRepository extends JpaRepository<Book, Long> {
-    List<Book> findByAuthors_firstNameContainsIgnoreCaseOrAuthors_lastNameContainsIgnoreCase(String firstName, String lastName);
+    List<Book> findByAuthors_nameContainsIgnoreCase(String firstName);
 
     Optional<Book> findFirstByTitleStartingWithIgnoreCase(String title);
 
@@ -21,8 +21,7 @@ public interface BookJpaRepository extends JpaRepository<Book, Long> {
     @Query(
             "SELECT b " +
                     " FROM Book b JOIN b.authors a " +
-                    " WHERE LOWER(a.firstName) LIKE LOWER(CONCAT('%', :name, '%'))" +
-                    " OR LOWER(a.lastName) LIKE LOWER(CONCAT('%', :name, '%'))"
+                    " WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :name, '%'))"
     )
     List<Book> findByAuthors(@Param("name") String name);
 
@@ -30,8 +29,7 @@ public interface BookJpaRepository extends JpaRepository<Book, Long> {
             "SELECT b " +
                     " FROM Book b JOIN b.authors a " +
                     " WHERE LOWER(b.title) LIKE LOWER(CONCAT(:title, '%'))" +
-                    " AND (LOWER(a.firstName) LIKE LOWER(CONCAT('%', :name, '%'))" +
-                    " OR LOWER(a.lastName) LIKE LOWER(CONCAT('%', :name, '%')))"
+                    " OR LOWER(a.name) LIKE LOWER(CONCAT('%', :name, '%'))"
     )
     List<Book> findByTitleAndAuthors(@Param("title") String title, @Param("name") String name);
 

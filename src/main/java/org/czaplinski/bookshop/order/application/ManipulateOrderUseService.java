@@ -6,10 +6,7 @@ import org.czaplinski.bookshop.catalog.domain.Book;
 import org.czaplinski.bookshop.order.application.port.ManipulateOrderUseCase;
 import org.czaplinski.bookshop.order.db.OrderJpaRepository;
 import org.czaplinski.bookshop.order.db.RecipientJpaRepository;
-import org.czaplinski.bookshop.order.domain.Order;
-import org.czaplinski.bookshop.order.domain.OrderItem;
-import org.czaplinski.bookshop.order.domain.OrderStatus;
-import org.czaplinski.bookshop.order.domain.Recipient;
+import org.czaplinski.bookshop.order.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +34,7 @@ public class ManipulateOrderUseService implements ManipulateOrderUseCase {
                 .items(items)
                 .build();
         Order save = repository.save(order);
-        bookRepository.saveAll(updateBooks(items));
+        bookRepository.saveAll(reduceBooks(items));
         return PlaceOrderResponse.success(save.getId());
     }
 
@@ -47,7 +44,7 @@ public class ManipulateOrderUseService implements ManipulateOrderUseCase {
                 .orElse(recipient);
     }
 
-    private Set<Book> updateBooks(Set<OrderItem> items) {
+    private Set<Book> reduceBooks(Set<OrderItem> items) {
         return items.stream()
                 .map(item -> {
                     Book book = item.getBook();
@@ -69,7 +66,10 @@ public class ManipulateOrderUseService implements ManipulateOrderUseCase {
     public void updateOrderStatus(Long id, OrderStatus status) {
         repository.findById(id)
                 .ifPresent(order -> {
-                    order.updateStatus(status);
+                    UpdateStatusResult updateStatusResult = order.updateStatus(status);
+                    if (updateStatusResult.isRevoke()) {
+                        bookRepository.saveAll(revokeBooks(order.getItems()));
+                    }
                     repository.save(order);
                 });
     }
@@ -79,5 +79,13 @@ public class ManipulateOrderUseService implements ManipulateOrderUseCase {
         repository.deleteById(id);
     }
 
-
+    private Set<Book> revokeBooks(Set<OrderItem> items) {
+        return items.stream()
+                .map(item -> {
+                    Book book = item.getBook();
+                    book.setAvailable(book.getAvailable() + item.getQuantity());
+                    return book;
+                }).collect(Collectors.toSet());
+    }
 }
+

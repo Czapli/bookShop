@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.czaplinski.bookshop.CreatedURI;
 import org.czaplinski.bookshop.catalog.application.port.CatalogUseCase;
 import org.czaplinski.bookshop.catalog.application.port.CatalogUseCase.CreateBookCommand;
@@ -23,7 +24,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+@Slf4j
 @RequestMapping("/catalog")
 @RestController
 @AllArgsConstructor
@@ -78,7 +79,7 @@ public class CatalogController {
     @PutMapping(value = "/{id}/cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void addCover(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
-        System.out.println("Got file" + file.getOriginalFilename());
+        log.info("Got file" + file.getOriginalFilename());
 
         catalog.updateBookCover(new CatalogUseCase.UpdateBookCoverCommand(
                 id,
